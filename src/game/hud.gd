@@ -2,6 +2,7 @@ class_name Game_HUD
 extends Node
 
 onready var _vbox := $Center/VBox as VBoxContainer
+onready var leave_button := $Leave as Button
 
 func add_username(text: String) -> void:
 	var label := Label.new()

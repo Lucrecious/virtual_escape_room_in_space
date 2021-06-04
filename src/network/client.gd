@@ -9,6 +9,8 @@ onready var network := _network_override if _network_override else Network
 
 onready var _login := $Login as Screen_Login
 
+var _client_ids_to_usernames := {}
+
 var _main: Node
 
 func _ready():
@@ -43,21 +45,41 @@ func _on_server_packet_received(packet: String, results: Dictionary) -> void:
 				_create_room(results.room_id)
 			ClientPacket.Response__Room_ClientID2Usernames:
 				if not _main is Game_Main: return
-				_main.hud.set_usernames(results.usernames)
+				_main.hud.set_usernames(results.ids2usernames.values())
+				_client_ids_to_usernames = results.ids2usernames.duplicate()
 			ClientPacket.Response__Room_Joined:
 				_create_room(results.room_id)
+			ClientPacket.Response__Room_Leave:
+				_leave_room()
+				return
 	else:
 		match packet:
 			ClientPacket.Notification__Room_UserEntered:
 				_main.hud.add_username(results.username)
+			ClientPacket.Notification__Room_UserLeft:
+				_main.hud.clear_usernames()
+				_client_ids_to_usernames.erase(results.client_id) 
+				_main.hud.set_usernames(_client_ids_to_usernames.values())
 				
+func _leave_room() -> void:
+	if _main is Game_Main:
+		_main.queue_free()
+		_main = null
+	
+	if _main != _login:
+		_main = _login
+		add_child(_login)
 
 func _create_room(room_id: String) -> void:
 	remove_child(_login)
 	var game := game_scene.instance() as Game_Main
 	_main = game
 	add_child(game)
+	game.hud.leave_button.connect('pressed', self, '_on_gui_leave_room_requested')
 	network.request_from_server(ServerRequest.QueryRoom_ClientID2Usernames, [room_id])
+
+func _on_gui_leave_room_requested() -> void:
+	network.request_from_server(ServerRequest.LeaveRoom)
 
 func _on_create_pressed() -> void:
 	network.request_from_server(ServerRequest.CreateRoom, [_login.get_username(), _login.get_room_name()])

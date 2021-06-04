@@ -9,11 +9,10 @@ onready var _disconnect := $Margin/Control/Disconnect as Button
 onready var _network_override := get_node_or_null(_network_override_path) as __Network__
 onready var network := _network_override if _network_override else Network
 
+# State
 onready var _state := $State
-
 var _clients := {}
 var _rooms := {}
-
 var _room_count := 0
 
 func _ready() -> void:
@@ -42,24 +41,49 @@ func _on_client_request_received(client_id: int, request: String, args: Array) -
 		ServerRequest.QueryRoom_ClientID2Usernames:
 			var room_id := args[0] as String
 			var room_client_ids := _get_room_client_ids(room_id)
-			var usernames := _get_usernames(room_client_ids)
+			var ids2usernames := _get_usernames(room_client_ids)
 			
 			network.send_client_packet([client_id], ClientPacket.Response__Room_ClientID2Usernames, {
 				succeeded = true,
-				client_ids = room_client_ids,
-				usernames = usernames,
+				ids2usernames = ids2usernames,
 			})
-			_log('sending client id to username mapping to %d for room %s: %s' % [client_id, room_id, str(usernames)] )
+			_log('sending client id to username mapping to %d for room %s: %s' % [client_id, room_id, str(ids2usernames)] )
 			return
+		ServerRequest.LeaveRoom:
+			var client := _clients.get(client_id, null) as Node
+			if not client: return
+			
+			var success := _leave_room(client)
+			if success:
+				network.send_client_packet([client_id], ClientPacket.Response__Room_Leave, { succeeded = true })
+			else:
+				network.send_client_packet([client_id], ClientPacket.Response__Room_Leave, _create_error_response('not in a room'))
 
-func _get_usernames(ids: PoolIntArray) -> PoolStringArray:
-	var usernames := PoolStringArray()
+func _leave_room(client: Server_Client) -> bool:
+	var room := client.get_parent() as Server_Room
+	if not room: return false
+	
+	room.remove_child(client)
+	if room.get_child_count() == 0:
+		room.queue_free()
+	
+	_state.add_child(client)
+	
+	var room_client_ids := _get_room_client_ids(room.id, [client.id])
+	network.send_client_packet(room_client_ids, ClientPacket.Notification__Room_UserLeft, {
+		client_id = client.id,
+	})
+	
+	return true
+
+func _get_usernames(ids: PoolIntArray) -> Dictionary:
+	var usernames := {}
 	
 	for id in ids:
 		if id == -1: continue
 		var client := _clients.get(id, null) as Server_Client
 		if not client: continue
-		usernames.push_back(client.display_name)
+		usernames[id] = client.display_name
 	
 	return usernames
 		
@@ -160,6 +184,15 @@ func _disconnect() -> void:
 	network.stop_listening()
 	_connect.disabled = false
 	_disconnect.disabled = true
+	
+	_clear_state()
+
+func _clear_state() -> void:
+	for child in _state.get_children():
+		child.queue_free()
+	
+	_clients.clear()
+	_rooms.clear()
 
 func _connect() -> void:
 	if multiplayer.network_peer.get_connection_status() != NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED: return
@@ -170,9 +203,12 @@ func _connect() -> void:
 func _on_client_disconnected(id: int) -> void:
 	_log('client disconnectd: %d' % id)
 	
-	var node := _clients.get(id, null) as Node
+	var node := _clients.get(id, null) as Server_Client
 	assert(node, 'client can only be disconnected if connected previously')
 	if not node: return
+	
+	_leave_room(node)
+
 	_clients.erase(node)
 	node.queue_free()
 

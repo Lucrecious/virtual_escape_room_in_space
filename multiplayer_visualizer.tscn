@@ -76,3 +76,15 @@ script = ExtResource( 4 )
 
 [node name="Client" parent="Views/ViewportContainer3/Viewport" instance=ExtResource( 1 )]
 _network_override_path = NodePath("../__Network__")
+
+[node name="Free" type="Button" parent="."]
+margin_left = 459.143
+margin_top = 315.99
+margin_right = 499.143
+margin_bottom = 335.99
+text = "Free"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="pressed" from="Free" to="Views/ViewportContainer3" method="queue_free"]
