@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://src/player/camera_updown.gd" type="Script" id=1]
+[ext_resource path="res://src/player/player.gd" type="Script" id=2]
+[ext_resource path="res://src/player/movement.gd" type="Script" id=3]
+
+[sub_resource type="CapsuleShape" id=1]
+radius = 0.5
+height = 0.5
+
+[sub_resource type="CapsuleMesh" id=2]
+radius = 0.5
+mid_height = 0.5
+
+[node name="PlayerDummy" type="KinematicBody"]
+script = ExtResource( 2 )
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
+shape = SubResource( 1 )
+
+[node name="MeshInstance" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
+mesh = SubResource( 2 )
+material/0 = null
+
+[node name="Pivot" type="Position3D" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.438391, -0.288941 )
+
+[node name="Camera" type="Camera" parent="Pivot"]
+current = true
+
+[node name="Movement" type="Spatial" parent="."]
+script = ExtResource( 3 )
+
+[node name="CameraUpDown" type="Spatial" parent="."]
+script = ExtResource( 1 )
+_pivot_path = NodePath("../Pivot")
