@@ -28,7 +28,6 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.438391, -0.288941 )
 
 [node name="Camera" type="Camera" parent="Pivot"]
-current = true
 
 [node name="Movement" type="Spatial" parent="."]
 script = ExtResource( 3 )

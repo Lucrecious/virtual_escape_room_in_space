@@ -18,6 +18,9 @@ _players_node_path = NodePath("Players")
 [node name="Player" parent="Players" instance=ExtResource( 1 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.897949, 0 )
 
+[node name="Camera" parent="Players/Player/Pivot" index="0"]
+current = true
+
 [node name="Controller_Real" type="Node" parent="Players/Player"]
 script = ExtResource( 2 )
 capture_mouse_motion = true
@@ -35,3 +38,5 @@ script = ExtResource( 5 )
 [node name="MeshInstance" type="MeshInstance" parent="."]
 mesh = SubResource( 1 )
 material/0 = null
+
+[editable path="Players/Player"]

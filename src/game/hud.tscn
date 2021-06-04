@@ -5,6 +5,7 @@
 [node name="Hud" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -13,23 +14,26 @@ __meta__ = {
 [node name="ColorRect" type="ColorRect" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 color = Color( 0.0980392, 0.105882, 0.101961, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="Center" type="CenterContainer" parent="ColorRect"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="VBox" type="VBoxContainer" parent="Center"]
+[node name="VBox" type="VBoxContainer" parent="ColorRect/Center"]
 margin_left = 512.0
 margin_top = 300.0
 margin_right = 512.0
 margin_bottom = 300.0
+mouse_filter = 2
 
 [node name="Leave" type="Button" parent="."]
 margin_left = 32.0
@@ -37,3 +41,18 @@ margin_top = 25.0
 margin_right = 110.0
 margin_bottom = 65.0
 text = "Leave"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HideHUD" type="Button" parent="."]
+margin_left = 33.3879
+margin_top = 84.4147
+margin_right = 130.388
+margin_bottom = 138.415
+text = "Hide HUD"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="pressed" from="HideHUD" to="ColorRect" method="set_visible" binds= [ false ]]
