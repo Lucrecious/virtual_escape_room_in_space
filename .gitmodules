@@ -1,0 +1,3 @@
+[submodule "lut"]
+	path = lut
+	url = https://github.com/Lucrecious/godot_lut
