@@ -32,7 +32,10 @@ func _ready():
 	dialog.appear('Unable to start connecting to server.', AlertDialog.ERROR_NETWORK)
 
 func _on_server_packet_received(response: String, results: Dictionary) -> void:
-	if not results.succeeded: return
+	if not results.succeeded:
+		var dialog := Popups.create_alert(get_viewport())
+		dialog.appear(results.reason, AlertDialog.ERROR_NETWORK)
+		return
 	
 	match response:
 		ClientPacket.Response__Room_Created:
