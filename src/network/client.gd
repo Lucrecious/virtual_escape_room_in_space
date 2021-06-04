@@ -31,22 +31,26 @@ func _ready():
 	var dialog := Popups.create_alert(get_viewport())
 	dialog.appear('Unable to start connecting to server.', AlertDialog.ERROR_NETWORK)
 
-func _on_server_packet_received(response: String, results: Dictionary) -> void:
-	if not results.succeeded:
-		var dialog := Popups.create_alert(get_viewport())
-		dialog.appear(results.reason, AlertDialog.ERROR_NETWORK)
-		return
-	
-	match response:
-		ClientPacket.Response__Room_Created:
-			_create_room(results.room_id)
-		ClientPacket.Response__Room_ClientID2Usernames:
-			if not _main is Game_Main: return
-			_main.hud.set_usernames(results.usernames)
-		ClientPacket.Response__Room_Joined:
-			_create_room(results.room_id)
-		ClientPacket.Notification__Room_UserEntered:
-			_main.hud.add_username(results.username)
+func _on_server_packet_received(packet: String, results: Dictionary) -> void:
+	if 'succeeded' in results:
+		if not results.succeeded:
+			var dialog := Popups.create_alert(get_viewport())
+			dialog.appear(results.reason, AlertDialog.ERROR_NETWORK)
+			return
+		
+		match packet:
+			ClientPacket.Response__Room_Created:
+				_create_room(results.room_id)
+			ClientPacket.Response__Room_ClientID2Usernames:
+				if not _main is Game_Main: return
+				_main.hud.set_usernames(results.usernames)
+			ClientPacket.Response__Room_Joined:
+				_create_room(results.room_id)
+	else:
+		match packet:
+			ClientPacket.Notification__Room_UserEntered:
+				_main.hud.add_username(results.username)
+				
 
 func _create_room(room_id: String) -> void:
 	remove_child(_login)

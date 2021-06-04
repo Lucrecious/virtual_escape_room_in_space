@@ -112,7 +112,6 @@ func _join_room(client_id: int, username: String, room_id: String) -> void:
 		notify_ids.push_back(id)
 	
 	network.send_client_packet(notify_ids, ClientPacket.Notification__Room_UserEntered, {
-		succeeded = true,
 		client_id = client_id,
 		username = username,
 	})
