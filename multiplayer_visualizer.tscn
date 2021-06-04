@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://src/network/client.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/network/server.tscn" type="PackedScene" id=2]
 [ext_resource path="res://lut/network/debug_multiplayer.gd" type="Script" id=3]
+[ext_resource path="res://src/network.gd" type="Script" id=4]
 
 [node name="DebugMultiplayer" type="Node"]
 
@@ -26,7 +27,11 @@ handle_input_locally = false
 render_target_update_mode = 3
 script = ExtResource( 3 )
 
+[node name="__Network__" type="Node" parent="Views/ViewportContainer/Viewport"]
+script = ExtResource( 4 )
+
 [node name="Client" parent="Views/ViewportContainer/Viewport" instance=ExtResource( 1 )]
+_network_override_path = NodePath("../__Network__")
 
 [node name="ViewportContainer2" type="ViewportContainer" parent="Views"]
 anchor_left = 1.0
@@ -43,7 +48,11 @@ handle_input_locally = false
 render_target_update_mode = 3
 script = ExtResource( 3 )
 
+[node name="__Network__" type="Node" parent="Views/ViewportContainer2/Viewport"]
+script = ExtResource( 4 )
+
 [node name="Server" parent="Views/ViewportContainer2/Viewport" instance=ExtResource( 2 )]
+_network_override_path = NodePath("../__Network__")
 
 [node name="ViewportContainer3" type="ViewportContainer" parent="Views"]
 anchor_left = 1.0
@@ -62,4 +71,8 @@ handle_input_locally = false
 render_target_update_mode = 3
 script = ExtResource( 3 )
 
+[node name="__Network__" type="Node" parent="Views/ViewportContainer3/Viewport"]
+script = ExtResource( 4 )
+
 [node name="Client" parent="Views/ViewportContainer3/Viewport" instance=ExtResource( 1 )]
+_network_override_path = NodePath("../__Network__")
