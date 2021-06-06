@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://src/player/player.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/player/movement.gd" type="Script" id=2]
 [ext_resource path="res://src/player/camera_updown.gd" type="Script" id=3]
 [ext_resource path="res://lut/input/controller_real.gd" type="Script" id=4]
+[ext_resource path="res://src/player/entity_detector.gd" type="Script" id=5]
 
 [node name="PlayerLocal" instance=ExtResource( 1 )]
 
@@ -21,5 +22,8 @@ _pivot_path = NodePath("../../PlayerLocal/Pivot")
 [node name="Controller_Real" type="Node" parent="." index="6"]
 script = ExtResource( 4 )
 capture_mouse_motion = true
+
+[node name="EntityDetector" type="Spatial" parent="." index="10"]
+script = ExtResource( 5 )
 
 [editable path="guy"]

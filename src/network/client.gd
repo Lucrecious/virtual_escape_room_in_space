@@ -55,11 +55,18 @@ func _on_server_packet_received(packet: String, results: Dictionary) -> void:
 			ClientPacket.Notification__Room_UserEntered:
 				if not game: return
 				game.hud.add_username(results.username)
+				_client_ids_to_usernames[results.client_id] = results.username
+				
 				var player: PlayerDummy
 				if results.client_id == multiplayer.get_network_unique_id():
 					player = game.level.add_player_local()
+					game.level.in_game_hud.set_player(player)
 				else:
 					player = game.level.add_player_dummy()
+				
+				var tooltip := NodE.get_child(player, TooltipText) as TooltipText
+				if tooltip:
+					tooltip.text = results.username
 				
 				player.global_transform.origin = results.position
 				_client_ids_to_player[results.client_id] = player

@@ -1,6 +1,8 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=15 format=2]
 
+[ext_resource path="res://src/ui/tooltip_position.gd" type="Script" id=1]
 [ext_resource path="res://src/player/player.gd" type="Script" id=2]
+[ext_resource path="res://src/ui/tooltip_text.gd" type="Script" id=3]
 [ext_resource path="res://assets/characters/guy.glb" type="PackedScene" id=4]
 [ext_resource path="res://src/player/animation.gd" type="Script" id=5]
 
@@ -110,5 +112,12 @@ script = ExtResource( 5 )
 
 [node name="guy" parent="." instance=ExtResource( 4 )]
 transform = Transform( -0.3, 0, -9.77524e-08, 0, 0.3, 0, 9.77524e-08, 0, -0.3, 0, -0.783038, 0 )
+
+[node name="DisplayNamePosition" type="Position3D" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.03478, 0 )
+script = ExtResource( 1 )
+
+[node name="TooltipText" type="Node" parent="."]
+script = ExtResource( 3 )
 
 [editable path="guy"]
