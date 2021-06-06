@@ -112,7 +112,7 @@ func _send_server_local_update() -> void:
 	network.request_from_server(ServerRequest.UpdateServerClient, [{
 		position = player.global_transform.origin,
 		look_at = -player.global_transform.basis.z,
-		animation = player.animation_player.current_animation,
+		animation = player.animation_player.current_animation(),
 	}])
 
 func _on_gui_leave_room_requested() -> void:
@@ -195,7 +195,7 @@ func _physics_process(delta: float) -> void:
 			player.look_at(player.global_transform.origin + interpolated_look_at, Vector3.UP)
 			
 			var animation := lower_data.data[id].animation as String
-			if not animation.empty() and player.animation_player.current_animation != lower_data.data[id].animation:
+			if not animation.empty() and player.animation_player.current_animation() != lower_data.data[id].animation:
 				player.animation_player.play(lower_data.data[id].animation)
 		break
 

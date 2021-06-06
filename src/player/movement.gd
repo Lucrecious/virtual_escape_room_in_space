@@ -5,7 +5,7 @@ signal started_moving()
 signal stopped_moving()
 
 export(float) var movement_speed := 10.0
-export(float) var gravity := 98.0
+export(float) var gravity := 980.0
 
 onready var _body := get_parent() as KinematicBody
 onready var _controller := NodE.get_sibling(self, Controller) as Controller

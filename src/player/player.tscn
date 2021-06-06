@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://src/player/player.gd" type="Script" id=2]
 [ext_resource path="res://assets/characters/guy.glb" type="PackedScene" id=4]
@@ -9,7 +9,22 @@ radius = 0.5
 height = 0.5
 
 [sub_resource type="Animation" id=2]
-resource_name = "idle"
+resource_name = "dance"
+length = 0.82
+loop = true
+step = 0.01
+tracks/0/type = "animation"
+tracks/0/path = NodePath("guy/AnimationPlayer")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"clips": PoolStringArray( "dance-loop" ),
+"times": PoolRealArray( 0 )
+}
+
+[sub_resource type="Animation" id=3]
 length = 3.3
 loop = true
 tracks/0/type = "animation"
@@ -23,8 +38,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 )
 }
 
-[sub_resource type="Animation" id=3]
-resource_name = "walk"
+[sub_resource type="Animation" id=4]
 length = 0.66
 loop = true
 step = 0.01
@@ -39,6 +53,38 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 )
 }
 
+[sub_resource type="AnimationNodeAnimation" id=5]
+animation = "dance"
+
+[sub_resource type="AnimationNodeAnimation" id=6]
+animation = "idle"
+
+[sub_resource type="AnimationNodeTransition" id=7]
+input_count = 3
+xfade_time = 0.08
+input_0/name = "idle"
+input_0/auto_advance = false
+input_1/name = "run"
+input_1/auto_advance = false
+input_2/name = "dance"
+input_2/auto_advance = false
+
+[sub_resource type="AnimationNodeAnimation" id=8]
+animation = "walk"
+
+[sub_resource type="AnimationNodeBlendTree" id=9]
+graph_offset = Vector2( -18.861, -18.1066 )
+nodes/dance/node = SubResource( 5 )
+nodes/dance/position = Vector2( 80, 250 )
+nodes/idle/node = SubResource( 6 )
+nodes/idle/position = Vector2( 90, 10 )
+nodes/idle_run/node = SubResource( 7 )
+nodes/idle_run/position = Vector2( 340, 50 )
+nodes/output/position = Vector2( 530, 70 )
+nodes/run/node = SubResource( 8 )
+nodes/run/position = Vector2( 90, 110 )
+node_connections = [ "output", 0, "idle_run", "idle_run", 0, "idle", "idle_run", 1, "run", "idle_run", 2, "dance" ]
+
 [node name="PlayerBase" type="KinematicBody"]
 script = ExtResource( 2 )
 
@@ -52,8 +98,14 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.438391, -0.288941 )
 [node name="Camera" type="Camera" parent="Pivot"]
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-anims/idle = SubResource( 2 )
-anims/walk = SubResource( 3 )
+anims/dance = SubResource( 2 )
+anims/idle = SubResource( 3 )
+anims/walk = SubResource( 4 )
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+tree_root = SubResource( 9 )
+anim_player = NodePath("../AnimationPlayer")
+parameters/idle_run/current = 2
 script = ExtResource( 5 )
 
 [node name="guy" parent="." instance=ExtResource( 4 )]
