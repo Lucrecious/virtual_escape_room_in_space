@@ -30,24 +30,22 @@ func _ready() -> void:
 		dialog.appear("Unable to start listening to clients.", AlertDialog.ERROR_NETWORK)
 
 func _on_client_request_received(client_id: int, request: String, args: Array) -> void:
-	_log('client request received from %d with request %s' % [client_id, request])
+	if request != ServerRequest.UpdateServerClient:
+		_log('client request received from %d with request %s' % [client_id, request])
+	
 	match request:
+		ServerRequest.UpdateServerClient:
+			_update_server_client(client_id, args[0])
 		ServerRequest.CreateRoom:
-			callv('_create_room', [client_id] + args)
+			var room := _create_room(client_id, args[1])
+			if not room:
+				network.send_client_packet([client_id], ClientPacket.Response__Room_Created, _create_error_response('error creating room.'))
+				return
+			
+			_join_room(client_id, args[0], room.id)
 			return
 		ServerRequest.JoinRoom:
 			callv('_join_room', [client_id] + args)
-			return
-		ServerRequest.QueryRoom_ClientID2Usernames:
-			var room_id := args[0] as String
-			var room_client_ids := _get_room_client_ids(room_id)
-			var ids2usernames := _get_usernames(room_client_ids)
-			
-			network.send_client_packet([client_id], ClientPacket.Response__Room_ClientID2Usernames, {
-				succeeded = true,
-				ids2usernames = ids2usernames,
-			})
-			_log('sending client id to username mapping to %d for room %s: %s' % [client_id, room_id, str(ids2usernames)] )
 			return
 		ServerRequest.LeaveRoom:
 			var client := _clients.get(client_id, null) as Node
@@ -57,14 +55,22 @@ func _on_client_request_received(client_id: int, request: String, args: Array) -
 			if success:
 				network.send_client_packet([client_id], ClientPacket.Response__Room_Leave, { succeeded = true })
 			else:
-				network.send_client_packet([client_id], ClientPacket.Response__Room_Leave, _create_error_response('not in a room'))
+				network.send_client_packet([client_id], ClientPacket.Response__Room_Leave, _create_error_response('not in a room.'))
+
+func _update_server_client(client_id: int, data: Dictionary) -> void:
+	var client := _clients.get(client_id, null) as Server_Client
+	if not client: return
+	
+	client.position = data.get('position', client.position)
+	client.look_at = data.get('look_at', client.look_at)
+	client.animation = data.get('animation', '')
 
 func _leave_room(client: Server_Client) -> bool:
 	var room := client.get_parent() as Server_Room
 	if not room: return false
 	
 	room.remove_child(client)
-	if room.get_child_count() == 0:
+	if room.get_clients().size() == 0:
 		room.queue_free()
 	
 	_state.add_child(client)
@@ -104,15 +110,15 @@ func _get_room_client_ids(room_id: String, exceptions := PoolIntArray()) -> Pool
 	
 	return ids
 
-func _join_room(client_id: int, username: String, room_id: String) -> void:
+func _join_room(client_id: int, username: String, room_id: String) -> bool:
 	var client := _clients.get(client_id, null) as Server_Client
 	
 	assert(client)
-	if not client: return
+	if not client: return false
 	
 	if client.get_parent() is Server_Room:
 		network.send_client_packet([client_id], ClientPacket.Response__Room_Joined, _create_error_response('client is already in room.'))
-		return
+		return false
 	
 	# TODO: Catch more errors
 	
@@ -121,39 +127,43 @@ func _join_room(client_id: int, username: String, room_id: String) -> void:
 	var room := _rooms.get(room_id, null) as Server_Room
 	if not room:
 		network.send_client_packet([client_id], ClientPacket.Response__Room_Joined, _create_error_response('room does not exist.'))
-		return
+		return false
 	
 	client.get_parent().remove_child(client)
 	room.add_child(client)
+	client.position = Vector3(0, 1, 0)
 	
 	network.send_client_packet([client_id], ClientPacket.Response__Room_Joined, {
 		succeeded = true,
 		room_id = room_id,
 	})
 	
-	var notify_ids := PoolIntArray()
-	for id in _get_room_client_ids(room_id, [client_id]):
-		notify_ids.push_back(id)
+	var notify_ids := _get_room_client_ids(room_id)
+	for id in notify_ids:
+		var client_in_room := _clients.get(id, null) as Server_Client
+		if not client_in_room: continue
+		
+		if client_id == id: continue
+		
+		network.send_client_packet([client_id], ClientPacket.Notification__Room_UserEntered, {
+			client_id = id,
+			username = client_in_room.display_name,
+			position = client_in_room.position,
+			look_at = client_in_room.look_at,
+			animation = client_in_room.animation,
+		})
 	
 	network.send_client_packet(notify_ids, ClientPacket.Notification__Room_UserEntered, {
 		client_id = client_id,
 		username = username,
+		position = client.position,
+		look_at = client.look_at,
+		animation = client.animation,
 	})
+	
+	return true
 
-func _create_room(client_id: int, username: String, room_name: String) -> void:
-	var client := _clients.get(client_id, null) as Server_Client
-	
-	assert(client)
-	if not client: return
-	
-	if client.get_parent() is Server_Room:
-		network.send_client_packet([client_id], ClientPacket.Response__Room_Joined, _create_error_response('client is already in room.'))
-		return
-	
-	# TOOD: Catch more errors
-	
-	client.display_name = username
-	
+func _create_room(client_id: int, room_name: String) -> Server_Room:
 	var room := Server_Room.new()
 	room.display_name = room_name
 	
@@ -162,17 +172,34 @@ func _create_room(client_id: int, username: String, room_name: String) -> void:
 	
 	_rooms[room.id] = room
 	
-	_state.add_child(room)
-	client.get_parent().remove_child(client)
-	room.add_child(client)
+	var sync_clients_timer := Timer.new()
+	sync_clients_timer.wait_time = 1.0/20.0
+	sync_clients_timer.autostart = true
+	sync_clients_timer.one_shot = false
+	sync_clients_timer.connect('timeout', self, '_send_clients_sync_data', [room])
+	room.add_child(sync_clients_timer)
 	
-	_send_create_room_response_succeed(client_id, room.id)
+	_state.add_child(room)
+	
+	return room
 
-func _send_create_room_response_succeed(client_id: int, room_id: String) -> void:
-	network.send_client_packet([client_id], ClientPacket.Response__Room_Created, { 
-		succeeded = true,
-		room_id = room_id,
-	})
+func _send_clients_sync_data(room: Server_Room) -> void:
+	var clients := room.get_clients()
+	var ids := PoolIntArray()
+	for c in clients:
+		ids.push_back(c.id)
+	
+	var data := {}
+	for c in clients:
+		data[c.id] = {
+			position = c.position,
+			look_at = c.look_at,
+			animation = c.animation,
+		}
+	
+	# Sends unreliable
+	for id in ids:
+		network.send_client_packet([id], ClientPacket.Notification__Room_Sync, data, true)
 
 func _create_error_response(reason: String) -> Dictionary:
 	return {

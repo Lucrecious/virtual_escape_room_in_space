@@ -13,12 +13,16 @@ func request_from_server(request: String, args := []) -> void:
 	if multiplayer.get_network_unique_id() == SERVER_ID: return
 	rpc_id(SERVER_ID, '_emit_client_request_signal', request, args)
 	
-func send_client_packet(clients: PoolIntArray, packet: String, results := {}) -> void:
+func send_client_packet(clients: PoolIntArray, packet: String, results := {}, unreliable := false) -> void:
 	assert(multiplayer.get_network_unique_id() == SERVER_ID, 'should only be called from server')
 	assert(not SERVER_ID in clients, 'should not be sending response to itself')
 	
-	for id in clients:
-		rpc_id(id, '_emit_server_response_signal', packet, results)
+	if unreliable:
+		for id in clients:
+			rpc_unreliable_id(id, '_emit_server_response_signal', packet, results)
+	else:
+		for id in clients:
+			rpc_id(id, '_emit_server_response_signal', packet, results)
 
 remote func _emit_client_request_signal(request: String, args: Array) -> void:
 	emit_signal('client_request_received', multiplayer.get_rpc_sender_id(), request, args)

@@ -16,7 +16,17 @@ func _ready() -> void:
 	_controller.connect('unhandled_input', self, '_on_unhandled_input')
 
 func _on_unhandled_input(event: InputEvent) -> void:
+	if event.is_echo(): return
+	
+	if event.is_action_pressed('toggle_first_person_mode'):
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		return
+	
 	if not event is InputEventMouseMotion: return
+	if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED: return
 	var motion := event as InputEventMouseMotion
 	
 	_body.rotate_y(-motion.relative.x * PI * 0.002)

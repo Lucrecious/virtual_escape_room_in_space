@@ -1,37 +1,62 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://src/player/camera_updown.gd" type="Script" id=1]
 [ext_resource path="res://src/player/player.gd" type="Script" id=2]
-[ext_resource path="res://src/player/movement.gd" type="Script" id=3]
+[ext_resource path="res://assets/characters/guy.glb" type="PackedScene" id=4]
+[ext_resource path="res://src/player/animation.gd" type="Script" id=5]
 
 [sub_resource type="CapsuleShape" id=1]
 radius = 0.5
 height = 0.5
 
-[sub_resource type="CapsuleMesh" id=2]
-radius = 0.5
-mid_height = 0.5
+[sub_resource type="Animation" id=2]
+resource_name = "idle"
+length = 3.3
+loop = true
+tracks/0/type = "animation"
+tracks/0/path = NodePath("guy/AnimationPlayer")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"clips": PoolStringArray( "idle-loop" ),
+"times": PoolRealArray( 0 )
+}
 
-[node name="PlayerDummy" type="KinematicBody"]
+[sub_resource type="Animation" id=3]
+resource_name = "walk"
+length = 0.66
+loop = true
+step = 0.01
+tracks/0/type = "animation"
+tracks/0/path = NodePath("guy/AnimationPlayer")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"clips": PoolStringArray( "walk-loop" ),
+"times": PoolRealArray( 0 )
+}
+
+[node name="PlayerBase" type="KinematicBody"]
 script = ExtResource( 2 )
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
 shape = SubResource( 1 )
 
-[node name="MeshInstance" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
-mesh = SubResource( 2 )
-material/0 = null
-
 [node name="Pivot" type="Position3D" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.438391, -0.288941 )
 
 [node name="Camera" type="Camera" parent="Pivot"]
 
-[node name="Movement" type="Spatial" parent="."]
-script = ExtResource( 3 )
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/idle = SubResource( 2 )
+anims/walk = SubResource( 3 )
+script = ExtResource( 5 )
 
-[node name="CameraUpDown" type="Spatial" parent="."]
-script = ExtResource( 1 )
-_pivot_path = NodePath("../Pivot")
+[node name="guy" parent="." instance=ExtResource( 4 )]
+transform = Transform( -0.3, 0, -9.77524e-08, 0, 0.3, 0, 9.77524e-08, 0, -0.3, 0, -0.783038, 0 )
+
+[editable path="guy"]

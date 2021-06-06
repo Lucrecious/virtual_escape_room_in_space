@@ -1,7 +1,8 @@
 class_name MoveToPoint
 extends Node
 
-const closeness_threshold := 1.0
+const closeness_threshold := .5
+const closeness_threshold2 := closeness_threshold * closeness_threshold
 
 onready var _body := get_parent() as KinematicBody
 onready var _controller := NodE.get_sibling(self, Controller_Virtual) as Controller_Virtual
@@ -14,9 +15,13 @@ func _ready() -> void:
 	assert(_controller, 'must be a sibling')
 
 func set_target_location(location: Vector3) -> void:
+	if (_body.global_transform.origin - location).length_squared() < closeness_threshold2:
+		_moving_to_target = false
+		return
+	
 	_moving_to_target = true
 	
-	if (_target_location - location).length() < closeness_threshold: return
+	if (_target_location - location).length_squared() < closeness_threshold2: return
 	_target_location = location
 
 func _physics_process(__: float) -> void:

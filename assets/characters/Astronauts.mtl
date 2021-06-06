@@ -1,0 +1,50 @@
+# Blender MTL File: 'Astronaut.blend'
+# Material Count: 4
+
+newmtl AstronautMaleBlack
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Ns CG\\AstBlackManTextures\\AstronautMaleBlack_Roughness.png
+refl AstBlackManTextures\\AstronautMaleBlack_Metallic.png
+
+newmtl AstronautMaleBlack.003
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Ns CG\\AstWhiteManTextures\\AstronautWhiteMan_Roughness.png
+refl CG\\AstWhiteManTextures\\AstronautWhiteMan_Metallic.png
+
+newmtl Astronaut_Suit
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Ns CG\\AstSpaceSuit\\Astronaut_Roughness.png
+refl CG\\AstSpaceSuit\\Astronaut_Metallic.png
+
+newmtl Astronaut_WhiteWoman
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Ns CG\\AstWhiteWomanTextures\\Astronaut_WhiteWoman_Roughness.png
+refl CG\\AstWhiteWomanTextures\\Astronaut_WhiteWoman_Metallic.png
