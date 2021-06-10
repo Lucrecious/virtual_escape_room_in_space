@@ -59,6 +59,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://src/levels/in_game_hud.gd"
 }, {
+"base": "Node",
+"class": "Interactable",
+"language": "GDScript",
+"path": "res://src/interact/interactable.gd"
+}, {
 "base": "Spatial",
 "class": "Level",
 "language": "GDScript",
@@ -135,6 +140,7 @@ _global_script_class_icons={
 "Game_HUD": "",
 "Game_Main": "",
 "HUD_InGame": "",
+"Interactable": "",
 "Level": "",
 "MoveToPoint": "",
 "Movement": "",
@@ -160,6 +166,7 @@ config/icon="res://icon.png"
 
 Network="*res://src/network.gd"
 Popups="*res://src/ui/popups/popup.gd"
+Dialog="*res://src/ui/dialog.gd"
 
 [display]
 

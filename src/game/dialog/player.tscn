@@ -1,0 +1,16 @@
+[gd_scene format=2]
+
+[node name="Control" type="AcceptDialog"]
+visible = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = -603.0
+margin_bottom = -348.0
+window_title = "Player"
+
+[node name="Label2" type="Label" parent="."]
+margin_left = 109.0
+margin_top = 61.0
+margin_right = 273.0
+margin_bottom = 92.0
+text = "This is another dude..."

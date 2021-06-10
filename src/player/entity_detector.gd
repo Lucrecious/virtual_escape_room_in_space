@@ -26,34 +26,40 @@ func get_collider() -> Spatial: return _collider
 
 var _collider: Spatial
 func _on_unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed('primary') and _collider:
+		var interactable := NodE.get_child(_collider, Interactable) as Interactable
+		if not interactable: return
+		interactable.show_dialog()
+		return
+	
 	var motion := event as InputEventMouseMotion
-	if not motion: return
-	
-	var space := get_world().direct_space_state
-	var camera := get_viewport().get_camera()
-	
-	var mouse_position: Vector2
-	if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		mouse_position = get_viewport().size / 2.0
-	else:
-		mouse_position = motion.position
-	
-	var origin := camera.project_ray_origin(mouse_position)
-	var normal := camera.project_ray_normal(mouse_position)
-	
-	var results := space.intersect_ray(origin, origin + normal * 100.0)
-	if results.empty():
-		results.collider = null
-		results.position = Vector3()
-	
-	if not results.collider:
-		_pointer3d.visible = false
-	else:
-		_pointer3d.visible = true
-		_pointer3d.global_transform.origin = results.position
-	
-	if _collider == results.collider: return
-	
-	_collider = results.collider
-	emit_signal('entity_detected')
+	if motion:
+		var space := get_world().direct_space_state
+		var camera := get_viewport().get_camera()
+		
+		var mouse_position: Vector2
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+			mouse_position = get_viewport().size / 2.0
+		else:
+			mouse_position = motion.position
+		
+		var origin := camera.project_ray_origin(mouse_position)
+		var normal := camera.project_ray_normal(mouse_position)
+		
+		var results := space.intersect_ray(origin, origin + normal * 100.0)
+		if results.empty():
+			results.collider = null
+			results.position = Vector3()
+		
+		if not results.collider:
+			_pointer3d.visible = false
+		else:
+			_pointer3d.visible = true
+			_pointer3d.global_transform.origin = results.position
+		
+		if _collider == results.collider: return
+		
+		_collider = results.collider
+		emit_signal('entity_detected')
+		return
 
